@@ -10,7 +10,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "io-document",
+	Use:   "iodocument-gen",
 	Short: "Выполняет команду и выводит её результат",
 	Long:  `Выполняет команду, переданную первым аргументом, перехватывает её результат и выводит на экран`,
 	// Uncomment the following line if your bare application

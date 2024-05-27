@@ -4,7 +4,9 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
@@ -28,12 +30,25 @@ func executeCommand(args []string) {
 
 	command := exec.Command(shell, flag, commandString)
 
+	output, err := command.CombinedOutput()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to execute command: %v\n", err)
+		return
+	}
+
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 
-	if err := command.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error executing command: %v\n", err)
+	event := cloudevents.NewEvent()
+	event.SetData(cloudevents.ApplicationJSON, map[string]string{"stdin": commandString, "stdout": string(output)})
+
+	bytes, err := json.Marshal(event)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to marshal Cloud Event")
+		return
 	}
+
+	fmt.Println(string(bytes))
 }
 
 func getShellAndFlag(separator rune) (string, string) {
